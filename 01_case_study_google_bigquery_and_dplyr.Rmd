@@ -130,7 +130,7 @@ jhu_covid19_nc_counties <- dbGetQuery(con,
 jhu_covid19_nc_counties
 ```
 
-### DBplyr approach
+## DBplyr approach
 
 If you don't know SQL, or are more fluent in `dplyr`, you can compose your queries with `dbplyr`.
 
@@ -271,7 +271,7 @@ jhu_covid19_DBP_nc_counties %>%
   arrange(-deaths)
 ```
 
-### SQL
+## SQL -- MORE
 
 ```{sql connection=con, output.var = "special_df"}
 
@@ -292,7 +292,7 @@ special_df %>%
             aes(confirmed, deaths, label = admin2, hjust = 1.15))
 ```
 
-## DBplyr and Austin Bikeshare trips
+## Example 2a: DBplyr and Austin Bikeshare trips
 
 Make the connection to the `bigquery-public-data.ustin_bikeshare` database
 
@@ -380,7 +380,7 @@ austin_bikeshare_all %>%
 summary(austin_bikeshare_all)
 ```
 
-## Example 2: Austin BikeShare
+## Example 2b: Austin BikeShare
 
 List the top 5 percent of stations where bikeshare trips begin and end
 
