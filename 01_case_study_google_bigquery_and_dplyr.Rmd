@@ -7,16 +7,17 @@ output: html_notebook
 
 1) Get a Google Cloud account
 
+    - [BigQuery sandbox](https://cloud.google.com/bigquery/docs/sandbox)
     - [Google Cloud Free Program](https://cloud.google.com/free/docs/gcp-free-tier)
     - [BigQuery public datasets](https://cloud.google.com/bigquery/public-data)
     - [BigQuery](https://cloud.google.com/bigquery)
     - [GCP-BigQuery Console](https://console.cloud.google.com/bigquery)
 
+No Credit Card?  [Use the BigQuery sandbox](https://cloud.google.com/blog/products/data-analytics/query-without-a-credit-card-introducing-bigquery-sandbox) 
 
 
-Following [Kevin Wang's document](https://kevinwang09.github.io/post/bigquery-in-r/)
 
-Gonna search JHU's Covid19 public database
+This example uses [Kevin Wang's article on BigQuery in R](https://kevinwang09.github.io/post/bigquery-in-r/) as a starting point.  In this example we will query [JHU's Covid19](https://github.com/CSSEGISandData/COVID-19) public dataset 
 
 
 ## Library packages
@@ -28,8 +29,16 @@ library(bigrquery)
 ```
 
 
+BigQuery refers to tables in the format `database.dataset.table`. For example, you can run this query in the BigQuery Console
 
-The `dbConnect()` argument, `billing`, should have the value of a GCP project ID
+```
+select * from bigquery-public-data.stackoverflow.users limit 10;
+```
+
+## Establish a database connection
+
+First create a new GCP project in the GCP.
+The `dbConnect()` argument, `billing`, should have the value of a GCP **project ID**
 
 GPC > Home > Dashboard
 GPC > BigQuery
@@ -51,22 +60,27 @@ Now, from **within the R console**, authenticate with GCP
 ```
 bigrquery::bq_auth()
 ```
+## Create a pointer to the a Google BQ database
 
-### DBI apprroach
-
-```
-DBI::dbGetQuery()
-```
-
-## Pointer to the a BQ database
-
-Let's search the JHU COVID19 summary table
+Our goal is to investigate the  search the JHU COVID19 _summary_ table.  i.e. bigquery-public-data.covid19_jhu_csse.summary
 
 
 ```{r}
 my_db_pointer <- tbl(con, "summary")
+```
+
+
+Now I can use dplyr verbs to explore the dataset.  Using my 
+
+```{r}
+# roughly:  SELECT * FROM bigquery-public-data.covid19_jhu_csse.summary limit 10;
 glimpse(my_db_pointer)
-tally(my_db_pointer)
+```
+
+
+```{r}
+# roughly:  SELECT count( * ) FROM summary
+count(my_db_pointer)
 ```
 
 
@@ -83,6 +97,7 @@ FROM `bigquery-public-data.covid19_jhu_csse.summary`
 LIMIT 10;")
 ```
 
+### Examples of a more complex SQL query
 ```
 {r}
 jhu_covid19_nc_counties_10 <- dbGetQuery(con,
@@ -129,37 +144,34 @@ an SQL query BUT using `dplyr` syntax
 
 > Note: `collect()` will run a query that has been assigned to an object
 
+```
+covid_data_DBplyr_style %>% 
+  collect()
+```
+
+Above will pull the whole data table down into your RAM.  You may want to avoid this.  Better to use dplyr to translate SQL querries to the SQL engine, summarizing and retrieving only the data you want to manipulate.
+
+
 ```{r}
 jhu_covid19_DBP_nc_counties <- covid_data_DBplyr_style %>% 
   filter(province_state == "North Carolina", date == '2020-06-30')  %>% 
   select(province_state, country_region, date, latitude, 
          longitude, confirmed, deaths, #location_geom,
-         recovered, active, fips, admin2, combined_key) %>% 
-  # show_query()
-  collect()
+         recovered, active, fips, admin2, combined_key) 
 
-jhu_covid19_DBP_nc_counties
+jhu_covid19_DBP_nc_counties 
 ```
 
-```{sql connection=con, output.var = "special_df"}
+### show_query()
 
-SELECT `province_state`, `country_region`, `date`, 
-       `latitude`, `longitude`, `confirmed`, `deaths`, 
-       `recovered`, `active`, `fips`, `admin2`, `combined_key`
-FROM `summary`
-WHERE ((`province_state` = 'North Carolina') AND (`date` = '2020-06-30'))
-```
+If you want to see the SQL
 
 ```{r}
-special_df %>% 
-  ggplot(aes(confirmed, deaths)) +
-  geom_jitter() +
-  geom_text(data = . %>% filter(deaths > 100), 
-            aes(confirmed, deaths, label = admin2, hjust = 1.15))
+jhu_covid19_DBP_nc_counties %>% 
+  show_query()
 ```
 
-
-
+### Variations
 
 ```{r}
 glimpse(my_db_pointer)
@@ -183,7 +195,7 @@ my_db_pointer %>%
          recovered, active, fips, admin2, combined_key)
 ```
 
-
+### Collecting all the data into a local tibble
 
 ```{r}
 jhu_covid19_durham_sinceApril <- covid_data_DBplyr_style %>% 
@@ -191,17 +203,19 @@ jhu_covid19_durham_sinceApril <- covid_data_DBplyr_style %>%
          admin2 == "Durham",
          date >= '2020-04-01')  %>% 
   select(date, confirmed, deaths, recovered, active, 
-         fips, admin2, combined_key) %>% 
-  collect()
+         fips, admin2, combined_key) 
 
-jhu_covid19_durham_sinceApril
+jhu_covid19_durham_sinceApril %>% 
+  collect()
 ```
 
 
 ```{r}
 jhu_covid19_durham_sinceApril %>% 
-  arrange(date)
+  arrange(date) 
 ```
+
+### Visualize
 
 ```{r}
 jhu_covid19_durham_sinceApril %>% 
@@ -214,10 +228,7 @@ jhu_covid19_durham_sinceApril %>%
     daily_count == 0 ~ "low"
   )) %>% 
   ggplot(aes(date, daily_count, "low", "medium")) +
-  # geom_line() +
   geom_jitter(aes(color = fct_relevel(scare, "low", "medium"))) +
-  # geom_density() +
-  # geom_area() +
   geom_smooth(method = lm, se = FALSE) +
   geom_smooth(color = "red", se = FALSE) +
   scale_color_manual(values = c("forestgreen", "goldenrod", "firebrick")) +
@@ -241,15 +252,11 @@ jhu_covid19_durham_sinceApril %>%
     daily_count <= 19 ~ "low"
   )) %>% 
   ggplot(aes(date, daily_count, "low", "medium")) +
-  # geom_line() +
   geom_point(aes(color = fct_relevel(scare, "low", "medium", "high", "extreme"))) +
   geom_smooth(method = lm, se = FALSE) +
   geom_smooth(color = "red", se = FALSE) +
   scale_color_manual(values = c("forestgreen", "goldenrod", "darkorange", "firebrick")) +
-  # scale_color_brewer(palette = "YlOrRd") +
   scale_x_date(breaks = "1 month", date_labels = "%b") +
-  # scale_x_continuous(breaks = seq(1,182, by = 30),
-  #                    labels = month.abb[4:10]) +
   guides(color = FALSE) +
   labs(title = "COVID19 Cases in Durham County, NC", 
        x = "", y = "daily county",
@@ -264,8 +271,30 @@ jhu_covid19_DBP_nc_counties %>%
   arrange(-deaths)
 ```
 
+### SQL
+
+```{sql connection=con, output.var = "special_df"}
+
+SELECT `province_state`, `country_region`, `date`, 
+       `latitude`, `longitude`, `confirmed`, `deaths`, 
+       `recovered`, `active`, `fips`, `admin2`, `combined_key`
+FROM `summary`
+WHERE ((`province_state` = 'North Carolina') AND (`date` = '2020-06-30'))
+```
+
+Above code chunk created the tibble `special_df` as identified in output.var
+
+```{r}
+special_df %>% 
+  ggplot(aes(confirmed, deaths)) +
+  geom_jitter() +
+  geom_text(data = . %>% filter(deaths > 100), 
+            aes(confirmed, deaths, label = admin2, hjust = 1.15))
+```
+
 ## DBplyr and Austin Bikeshare trips
 
+Make the connection to the `bigquery-public-data.ustin_bikeshare` database
 
 ```{r}
 con2_bq_bikes <- dbConnect(
@@ -277,136 +306,10 @@ con2_bq_bikes <- dbConnect(
 con2_bq_bikes
 ```
 
+Set the query pointer to `bigquery-public-data.ustin_bikeshare.bikesahre_trips` table
 
 ```{r}
 bikeshare_trips <- tbl(con2_bq_bikes, "bikeshare_trips") 
-```
-
-
-```{r}
-austin_bikeshare_trips <- bikeshare_trips %>% 
-  mutate(trip_id = as.character(trip_id)) %>% 
-  head(100000) %>%
-  collect()
-```
-
-```{r}
-range(austin_bikeshare_trips$start_time)
-```
-
-date range of retrieved data:   "2013-12-21 10:12:00 UTC" "2020-06-30 21:27:29 UTC"
-
-```{r}
-austin_bikeshare_trips %>% 
-  arrange(start_time)
-```
-
-### compare
-
-I was having some trouble with bulk SQL GET via big-query, so I  selected all at the console and saved to google drive (then download, now import).  Comparing the tables....
-
-in bq_console:
-
-```
-SELECT COUNT(*)
-FROM `bigquery-public-data.austin_bikeshare.bikeshare_trips`
-```
-
-ANSWER:  1,264,113
-
-
-```
-{r}
-austin_trips <- read_csv("data/austin_bike_trips.csv")
-
-austin_trips
-```
-
-
-So, I'm not sure what the error is about.  Maybe if I do a DBI query it will work?
-
-```
-{r}
-austin_trips
-```
-```
-{r}
-range(austin_trips$start_time)
-```
-
-```
-{r}
-glimpse(austin_trips)
-```
-
-
-
-```
-{r}
-austen_viaDBI <- dbGetQuery(con2_bq_bikes,
-           "SELECT
-              *
-            FROM
-              `bigquery-public-data.austin_bikeshare.bikeshare_trips`
-              "
-            )
-```
-
-**Error:**
-```
-Running job 'infra-radius-291118.job_piWh-nbTwTkc37iHiqVpCUOubawc.US' [\] 14s
-Complete
-Billed: 136.31 MB
-Downloading 1,264,113 rows in 127 pages.
-Downloading data [===>------------------------------------------------------------------------------]   5% ETA: 42sError: Invalid value at 'start_index' (TYPE_UINT64), "1e+05" [invalid] 
-
-```
-
-### Date comparison
-
-- from dbplyr:
-
-    -  2013-12-21 10:12:00 UTC" "2020-06-30 21:27:29 UTC"
-
-- from bq_console_download_ingest:
-
-    - "2013-12-21 09:12:00 UTC" "2020-06-30 22:04:11 UTC"
-    
-    
-So there is some scrunchy data in there somewhere.  Or a problem with my SQL approach.  Anyway, the purpose of `DBplyr` and `DBI` is not about downloading the whole table.  It's about gathering just the data that is needed. 
-
-
-```
-{r}
-austin_trips %>% 
-  count(subscriber_type, sort = TRUE)
-```
-
-
-```{r}
-austin_bikeshare_trips %>% 
-  count(subscriber_type, sort = TRUE) %>% 
-  filter(str_detect(subscriber_type, "eekender")) #regex("weekender", ignore_case = TRUE)))
-```
-
-## Error / `options(scipen = 20)`
-
-At some point, I'm not able to download all the data.  I get the error:  
-
-> Invalid value at 'start_index' (TYPE_UINT64), "1e+05" [invalid]
-
-[according to stackoverflow.com](https://stackoverflow.com/questions/63328348/invalid-value-at-start-index-type-uint64-1e05-invalid-issue-while-down)
-
-_The issue is caused as BigQuery allows only 100k records to be downloaded. _
-
-
-_Adding the `options(scipen = 20)` script to the start of your code will solve the issue._
-
-Or, updating the `bigrquery` package to the latest version will fix your issue.
-
-
-```{r}
-# options(scipen = 20)
 ```
 
 
@@ -432,7 +335,6 @@ austin_bikeshare_all <- bikeshare_trips %>%
 
 ```{r}
 austin_bikeshare_all
-#austin_trips
 ```
 
 ```
@@ -448,8 +350,7 @@ bigrquery::bq_table_fields("bigquery-public-data.austin_bikeshare.bikeshare_trip
 
 ```{r}
 glimpse(austin_bikeshare_all)
-# print("\n-----------------\n")
-# glimpse(austin_trips)
+glimpse(bikeshare_trips)
 ```
 
 [How far is to far to bike to work?](https://mobilitylab.org/2017/02/27/how-far-bike-work/)
@@ -463,24 +364,42 @@ austin_bikeshare_all %>%
     duration_minutes <= 10 ~ "Commuter",
     duration_minutes >  10 ~ "Tourist"
   )) %>% 
-  # filter(subscriber_type == "Walk Up") %>% 
   ggplot(aes(duration_minutes, fct_reorder(fct_lump(subscriber_type, prop = 0.01), duration_minutes))) +
   geom_boxplot(aes(fill = travel_type)) +
   geom_vline(xintercept = 10, linetype = "dashed", color = "grey60") +
   scale_x_log10() +
-  # facet_wrap(~ travel_type) +
-  # guides(fill = FALSE)
   labs(title = "Bike Share Trip times", 
        subtitle = "Austin BikeShare Program",
        y = "Type of bike rental pass",
        x = "Duration of ride in minutes",
        caption = "Source: Public datasets > Google BigQuery > Austin Bikeshare Trips",
        fill = "") 
-  # facet_wrap(~ fct_reorder(fct_lump(subscriber_type, prop = 0.01), duration_minutes))
 ```
 
 ```{r}
 summary(austin_bikeshare_all)
+```
+
+## Example
+
+List the top 5 percent of stations where bikeshare trips begin and end
+
+```{r}
+left_tbl <- bikeshare_trips %>% 
+  count(start_station_name) %>% 
+  slice_max(order_by = n, prop = .05)
+left_tbl
+
+right_tbl <- bikeshare_trips %>% 
+  count(end_station_name) %>% 
+  slice_max(order_by = n, prop = .05)
+right_tbl
+
+left_join(left_tbl, right_tbl, by = c("start_station_name" = "end_station_name")) # %>% show_query()
+```
+
+```{r}
+
 ```
 
 
