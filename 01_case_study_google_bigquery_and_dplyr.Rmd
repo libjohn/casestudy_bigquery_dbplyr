@@ -380,7 +380,7 @@ austin_bikeshare_all %>%
 summary(austin_bikeshare_all)
 ```
 
-## Example
+## Example 2: Austin BikeShare
 
 List the top 5 percent of stations where bikeshare trips begin and end
 
@@ -398,8 +398,125 @@ right_tbl
 left_join(left_tbl, right_tbl, by = c("start_station_name" = "end_station_name")) # %>% show_query()
 ```
 
-```{r}
+## Example 3: NYC tree census
 
+Inspired by [Edgar Ruiz's dbplyr presentation](https://rstudio.com/resources/rstudioconf-2019/databases-using-r-the-latest/)
+
+[DBplot](https://db.rstudio.com/dbplot/) leverages dployr to process the calculationsof a plot inside a database.
+
+```{r}
+con_ny_trees <- dbConnect(
+  bigrquery::bigquery(),
+  project = "bigquery-public-data",
+  dataset = "new_york_trees",
+  billing = "infra-radius-291118"
+)
+con_ny_trees
+```
+
+Set the query pointer to `bigquery-public-data.ustin_bikeshare.bikesahre_trips` table
+
+```{r}
+nytrees <- tbl(con_ny_trees, "tree_census_2015") 
+```
+
+```{r}
+library(dbplot)
+library(leaflet)
+```
+
+
+```{r}
+glimpse(nytrees)
+nytrees %>% 
+  count(curb_loc)
+```
+
+Good and healthy trees offset from the curb.
+
+```{r}
+locations <- nytrees %>% 
+  filter(curb_loc == "OffsetFromCurb") %>% 
+  filter(health == "Good") %>% 
+  dbplot_raster(longitude, latitude, resolution = 30)
+  # db_compute_raster(longitude, latitude, resolution = 30)
+locations
+```
+
+```{r}
+nytrees %>% 
+  filter(curb_loc == "OffsetFromCurb") %>% 
+  filter(health == "Good") %>% 
+  count()
+
+locations_tbl <- nytrees %>% 
+  filter(curb_loc == "OffsetFromCurb") %>% 
+  filter(health == "Good") %>% 
+  db_compute_raster(longitude, latitude, resolution = 30)
+locations_tbl
+```
+
+Tidy eval function [by Ruiz (timestamp 13:47)](https://rstudio.com/resources/rstudioconf-2019/databases-using-r-the-latest/)
+
+```{r}
+size <- function(df, field) {
+  field <- enquo(field)
+  df %>% 
+    arrange(!! field) %>% 
+    mutate(diff = !! field - lag(!! field)) %>% 
+    filter(diff > 0) %>% 
+    summarise(min(diff)) %>% 
+    pull()
+}
+```
+
+
+```{r}
+lon_size <- locations_tbl %>% 
+  size(longitude)
+
+lon_size
+
+lat_size <- locations_tbl %>% 
+  size(latitude)
+
+lat_size
+```
+
+
+
+```{r}
+sq <- locations_tbl %>% 
+  mutate(lon1 = longitude,
+         lon2 = longitude + lon_size,
+         lat1 = latitude,
+         lat2 = latitude + lat_size,
+         of_max = `n()` / max(`n()`)
+  )
+```
+
+
+```{r}
+leaflet() %>% 
+  addTiles() %>% 
+  addRectangles(
+    sq$lon1, sq$lat1, sq$lon2, sq$lat2
+  )
+```
+
+
+```{r}
+fancy <- leaflet() %>% 
+  addTiles() %>% 
+  addRectangles(
+    sq$lon1, sq$lat1, sq$lon2, sq$lat2,
+    fillOpacity = sq$of_max,
+    fillColor = "forestgreen",
+    stroke = FALSE,
+    popup = glue::glue('Trees {sq$`n()`}')
+  )
+
+fancy
 ```
 
 
