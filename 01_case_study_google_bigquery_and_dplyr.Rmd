@@ -62,9 +62,9 @@ Now, from **within the R console**, authenticate with GCP
 ```
 bigrquery::bq_auth()
 ```
-## Create a pointer to the a Google BQ database
+## Create a pointer to a Google BQ database table
 
-Our goal is to investigate the  search the JHU COVID19 _summary_ table.  i.e. bigquery-public-data.covid19_jhu_csse.summary
+Our goal is to investigate and search the JHU COVID19 _summary_ **table**.  i.e. bigquery-public-data.covid19_jhu_csse.summary
 
 
 ```{r}
@@ -72,26 +72,25 @@ my_db_pointer <- tbl(con, "summary")
 ```
 
 
-Now I can use [dplyr verbs](https://dplyr.tidyverse.org/) to explore the dataset.  
+Now I can use [dplyr verbs](https://dplyr.tidyverse.org/) to explore the db table.  
 
-whats
 
 ```{r}
 # roughly:  SELECT * FROM bigquery-public-data.covid19_jhu_csse.summary limit 10;
-glimpse(my_db_pointer)
+glimpse(my_db_pointer) 
 ```
 
 
 ```{r}
 # roughly:  SELECT count( * ) FROM summary
-count(my_db_pointer)
+count(my_db_pointer) 
 ```
 
 
 
 ## SQL
 
-Using `DBI`, can compose SQL directly.
+Using `DBI`, you can compose SQL directly.  See also, [Writing SQL with dbplyr](https://dbplyr.tidyverse.org/articles/sql.html)
 
 ```
 {r}
@@ -134,26 +133,36 @@ jhu_covid19_nc_counties <- dbGetQuery(con,
 jhu_covid19_nc_counties
 ```
 
-## DBplyr approach
+Similar to `glimpse()` but more SQLish
 
-If you don't know SQL, or are more fluent in `dplyr`, you can compose your queries with `dbplyr`.
+```{r}
+bigrquery::bq_table_fields("bigquery-public-data.austin_bikeshare.bikeshare_trips")
+```
 
-First make a connection....
+
+
+## dpplyr/dbplyr approach
+
+If you don't know SQL, or are more comfortable with `dplyr`, you can compose your queries with `dplyr` verbs.  `dbplyr` is the backend to `dplyr` and will broker the process.  In practice you do not need to call `dbplyr` and the easiest thing to do is load `library(tidyverse)` at the top of your script.
+
+First _connect to a table_ using the `tbl()` function.  This assumes you have already used `DBI::dbConnect()` to broker the database connection -- as we did above.
 
 ```{r}
 covid_data_DBplyr_style <- tbl(con, "summary") 
 ```
 
-an SQL query BUT using `dplyr` syntax
 
-> Note: `collect()` will run a query that has been assigned to an object
+
+> Note: `collect()` will run a query that has been assigned to an object. 
+
+`collect()` will activate your SQL query.  Normally, I will try to use use the `collect()` sparingly to economize my connections to the remote database, and limit the data I am requesting from the DB server.  My goal is push my data processing up to the RDBMS server as much as possible.
 
 ```
 covid_data_DBplyr_style %>% 
-  collect()
+  collect()   # this will gather all the data from the summary table
 ```
 
-Above will pull the whole data table down into your RAM.  You may want to avoid this.  Better to use dplyr to translate SQL querries to the SQL engine, summarizing and retrieving only the data you want to manipulate.
+Above will pull the entire data table down into local RAM.  A better approach is to leverage dplyr.  Let dplyr/dbplyr translate queries into SQL and send those to the SQL engine.  This allows use to use the RDMBS for summarizing data while using local RAM and CPU for retrieving only the data you want to manipulate.
 
 
 ```{r}
@@ -175,7 +184,13 @@ jhu_covid19_DBP_nc_counties %>%
   show_query()
 ```
 
+See Also [Writing SQL with dbplyr](https://dbplyr.tidyverse.org/articles/sql.html)  
+See Also dbplyr > Articles > Verb translation  
+See Also dbplyr > Articles > Function translation  
+
 ### Variations
+
+The following are some initial variations using dplyr verbs to create SQL queries, and connect with the RDMBS in a client/server fashion.
 
 ```{r}
 glimpse(my_db_pointer)
@@ -188,15 +203,8 @@ my_search <- my_db_pointer %>%
 
 my_search  
 
-my_local_df <- my_search %>% 
+my_search %>% 
   collect()
-my_local_df
-
-my_db_pointer %>% 
-  filter(province_state == "North Carolina", date == '2020-06-30')  %>% 
-  select(province_state, country_region, date, latitude, 
-         longitude, confirmed, deaths, #location_geom,
-         recovered, active, fips, admin2, combined_key)
 ```
 
 ### Collecting all the data into a local tibble
@@ -209,17 +217,24 @@ jhu_covid19_durham_sinceApril <- covid_data_DBplyr_style %>%
   select(date, confirmed, deaths, recovered, active, 
          fips, admin2, combined_key) 
 
-jhu_covid19_durham_sinceApril %>% 
+my_local_tbl <- jhu_covid19_durham_sinceApril %>% 
   collect()
+
+my_local_tbl
 ```
 
 
 ```{r}
 jhu_covid19_durham_sinceApril %>% 
   arrange(date) 
+
+my_local_tbl %>% 
+  arrange(date)
 ```
 
 ### Visualize
+
+Creating visualizations requires 100% of the data.  the [dbplot package](https://db.rstudio.com/dbplot) provides helper functions that automate the aggregation and plotting steps.  `dbplot` is an alternative visualization approach to assist in the best practices of _transforming_ data in the database, then _plotting_ in R.  Please also see this fuller [discussion on creating visualizations](https://db.rstudio.com/best-practices/visualization/) from databases using R.
 
 ```{r}
 jhu_covid19_durham_sinceApril %>% 
@@ -298,7 +313,7 @@ special_df %>%
 
 ## Example 2a: DBplyr and Austin Bikeshare trips
 
-Make the connection to the `bigquery-public-data.ustin_bikeshare` database
+Make the connection to the `bigquery-public-data.austin_bikeshare` database.
 
 ```{r}
 con2_bq_bikes <- dbConnect(
@@ -310,19 +325,10 @@ con2_bq_bikes <- dbConnect(
 con2_bq_bikes
 ```
 
-Set the query pointer to `bigquery-public-data.ustin_bikeshare.bikesahre_trips` table
+Set the query pointer to `bigquery-public-data.austin_bikeshare.bikeshare_trips` table.
 
 ```{r}
 bikeshare_trips <- tbl(con2_bq_bikes, "bikeshare_trips") 
-```
-
-
-
-```{r}
-austin_bikeshare_walkup <- bikeshare_trips %>% 
-  mutate(trip_id = as.double(trip_id)) %>% 
-  filter(subscriber_type == "Walk Up") %>% 
-  collect()
 ```
 
 
@@ -337,16 +343,12 @@ austin_bikeshare_all <- bikeshare_trips %>%
 austin_bikeshare_all
 ```
 
-```{r}
-bigrquery::bq_table_fields("bigquery-public-data.austin_bikeshare.bikeshare_trips")
-```
-
-
 
 ```{r}
 glimpse(austin_bikeshare_all)
-glimpse(bikeshare_trips)
 ```
+
+### Visualize
 
 [How far is too far to bike to work?](https://mobilitylab.org/2017/02/27/how-far-bike-work/)
 
@@ -377,7 +379,9 @@ summary(austin_bikeshare_all)
 
 ## Example 2b: Austin BikeShare
 
-List the top 5 percent of stations where bikeshare trips begin and end
+List the top 5 percent of locations (stations) where bike-share trips begin and end.
+
+Then, use `left_join()` to affect a database SQL join or table merge.
 
 ```{r}
 left_tbl <- bikeshare_trips %>% 
@@ -397,7 +401,7 @@ left_join(left_tbl, right_tbl, by = c("start_station_name" = "end_station_name")
 
 Inspired by [Edgar Ruiz's dbplyr presentation](https://rstudio.com/resources/rstudioconf-2019/databases-using-r-the-latest/)
 
-[DBplot](https://db.rstudio.com/dbplot/) leverages dployr to process the calculationsof a plot inside a database.
+[DBplot](https://db.rstudio.com/dbplot/) leverages dplyr to process the calculations of a plot inside a database.
 
 ```{r}
 con_ny_trees <- dbConnect(
@@ -415,6 +419,9 @@ Set the query pointer to `bigquery-public-data.ustin_bikeshare.bikesahre_trips` 
 nytrees <- tbl(con_ny_trees, "tree_census_2015") 
 ```
 
+### Visualize
+
+
 ```{r}
 library(dbplot)
 library(leaflet)
@@ -427,7 +434,9 @@ nytrees %>%
   count(curb_loc)
 ```
 
-Good and healthy trees offset from the curb.
+#### dbplot_raster()
+
+Above, we **subset the data at the database** to _good and healthy trees_, _offset from the curb_.  Now use the `dbpot_raster()` function to **plot in R**
 
 ```{r}
 locations <- nytrees %>% 
@@ -437,6 +446,7 @@ locations <- nytrees %>%
   # db_compute_raster(longitude, latitude, resolution = 30)
 locations
 ```
+#### db_compute_raster()
 
 ```{r}
 nytrees %>% 
@@ -450,6 +460,8 @@ locations_tbl <- nytrees %>%
   db_compute_raster(longitude, latitude, resolution = 30)
 locations_tbl
 ```
+
+#### Tidy evaluation functions
 
 Tidy eval function [by Ruiz (timestamp 13:47)](https://rstudio.com/resources/rstudioconf-2019/databases-using-r-the-latest/)
 
@@ -490,6 +502,7 @@ sq <- locations_tbl %>%
   )
 ```
 
+#### Leaflet map
 
 ```{r}
 leaflet() %>% 
