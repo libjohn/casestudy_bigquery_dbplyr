@@ -49,3 +49,6 @@ Get a Google Cloud account
 - [BigQuery public datasets](https://cloud.google.com/bigquery/public-data)
 - [BigQuery](https://cloud.google.com/bigquery)
 - [GCP-BigQuery **Console**](https://console.cloud.google.com/bigquery)
+
+
+![](images/tree_cover.png)

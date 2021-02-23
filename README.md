@@ -51,3 +51,5 @@ Get a Google Cloud account
 -   [BigQuery](https://cloud.google.com/bigquery)
 -   [GCP-BigQuery
     **Console**](https://console.cloud.google.com/bigquery)
+
+![](images/tree_cover.png)

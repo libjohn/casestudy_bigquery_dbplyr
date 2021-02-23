@@ -1,0 +1,131 @@
+---
+title: "Using dplyr to query a relational database"
+author: "John Little"
+date: '`r Sys.Date()`'
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: xaringan-themer.css
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+```
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+style_duo_accent(
+  primary_color = "#1381B0",
+  secondary_color = "#FF961C",
+  inverse_header_color = "#FFFFFF"
+)
+library(tidyverse)
+library(gt)
+```
+
+## Demonstration Goals
+
+- Connect to a remote relational database using R library packages
+- Leverage dplyr verbs to query a relational database
+- Expose some advance query and visualization features
+- Highlight useful documentation / resources 
+
+
+This is not an RDBMS class.  The foundations of database administration and database engineering require more time that we have. This is a demonstration on leveraging the Tidyverse.
+---
+##  Flat file
+
+A database within in a single table
+
+```{r echo=FALSE}
+mtcars %>% 
+  slice_head(n = 10) %>% 
+  gt()
+```
+
+
+---
+## Relational databases  
+
+A database with associated entities (tables)
+
+![](images/database_schema_wikimediacommons.png)
+
+Image Credit:  [SQLPac](https://en.wikipedia.org/wiki/User:SqlPac)
+
+???
+Image Attribution: 
+
+- database_schema_wikemediacommons.png <https://commons.wikimedia.org/wiki/File:%D0%9F%D1%80%D0%B8%D0%BA%D0%BB%D0%B0%D0%B4_%D1%81%D1%85%D0%B5%D0%BC%D0%B8_%D0%B7%D1%96%D1%80%D0%BA%D0%B8.png> by SQLPac <https://en.wikipedia.org/wiki/User:SqlPac>
+
+---
+## Flat file v Relational database
+
+Flat | Relational
+---  | ---
+Best for a single user | Multi-user
+Local disk             | Cloud storage 
+Simple queries         | Advanced queries
+Data is static         | Data is dynamic / changes often
+Small to medium data   | Medium to large dataset 
+Simple format          | Complex structure
+
+
+---
+## Complexities & Nuances
+
+- Many good reasons to keep your data as a flat file  
+- Several good reasons to pursue more complex data structures and deliveries
+- Querying, using, and maintaining databases can be computationally and financially expensive
+
+We're not going to discuss those complexities.  We're going to demonstrate how you can use your RStudio environment to query remote relational databases.
+
+
+---
+## SQL
+
+Structured Query Language
+
+```sql
+
+SELECT 
+  bdate, address
+FROM
+  EMPLOYEE
+WHERE 
+  fname = "John" AND 
+  minit = "R" AND
+  lname = "Little"
+
+```
+
+---
+## dplyr
+
+
+```r
+employee %>% 
+  filter(fname == "John", 
+         minit == "R",
+         lname == "Little") %>% 
+  select(bdate, address)
+```
+
+```r
+left_join()
+```
+
+_d**b**plyr_
+
+---
+## Steps
+
+1. [Google BigQuery sandbox](https://cloud.google.com/blog/products/data-analytics/query-without-a-credit-card-introducing-bigquery-sandbox)
+1. `install.packages(c("tidyverse", "DBI", "dbplyr", "bigrquery"))`
+1. [Query BigQuery public datasets](https://cloud.google.com/bigquery/public-data)
+
+

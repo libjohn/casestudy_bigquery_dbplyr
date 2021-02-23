@@ -1,5 +1,7 @@
 ---
 title: "Connecting to Google BigQuery with DBplyr"
+author: "John R Little"
+date:  "`r Sys.Date()`"
 output: html_notebook
 ---
 
@@ -17,7 +19,7 @@ No Credit Card?  [Use the BigQuery sandbox](https://cloud.google.com/blog/produc
 
 
 
-This example uses [Kevin Wang's article on BigQuery in R](https://kevinwang09.github.io/post/bigquery-in-r/) as a starting point.  In this example we will query [JHU's Covid19](https://github.com/CSSEGISandData/COVID-19) public dataset 
+The first part of this demonstration is inspired by [Kevin Wang's article on BigQuery in R](https://kevinwang09.github.io/post/bigquery-in-r/).  In this example we will query [JHU's Covid19](https://github.com/CSSEGISandData/COVID-19) public dataset. moo
 
 
 ## Library packages
@@ -70,7 +72,9 @@ my_db_pointer <- tbl(con, "summary")
 ```
 
 
-Now I can use dplyr verbs to explore the dataset.  Using my 
+Now I can use [dplyr verbs](https://dplyr.tidyverse.org/) to explore the dataset.  
+
+whats
 
 ```{r}
 # roughly:  SELECT * FROM bigquery-public-data.covid19_jhu_csse.summary limit 10;
@@ -301,7 +305,7 @@ con2_bq_bikes <- dbConnect(
   bigrquery::bigquery(),
   project = "bigquery-public-data",
   dataset = "austin_bikeshare",
-  billing = "infra-radius-291118"
+  billing = "workshop-rfun-2021-spring"
 )
 con2_bq_bikes
 ```
@@ -317,10 +321,7 @@ bikeshare_trips <- tbl(con2_bq_bikes, "bikeshare_trips")
 ```{r}
 austin_bikeshare_walkup <- bikeshare_trips %>% 
   mutate(trip_id = as.double(trip_id)) %>% 
-  # select(trip_id:duration_minutes) %>% 
   filter(subscriber_type == "Walk Up") %>% 
-  #        start_time <= "2016-01-01") %>% 
-  # head(100000) %>%
   collect()
 ```
 
@@ -328,18 +329,12 @@ austin_bikeshare_walkup <- bikeshare_trips %>%
 ```{r}
 austin_bikeshare_all <- bikeshare_trips %>% 
   mutate(trip_id = as.double(trip_id)) %>% 
-  # filter(subscriber_type == "Walk Up") %>% 
   collect()
 ```
 
 
 ```{r}
 austin_bikeshare_all
-```
-
-```
-{r}
-all_equal(austin_bikeshare_all, austin_trips)
 ```
 
 ```{r}
@@ -353,7 +348,7 @@ glimpse(austin_bikeshare_all)
 glimpse(bikeshare_trips)
 ```
 
-[How far is to far to bike to work?](https://mobilitylab.org/2017/02/27/how-far-bike-work/)
+[How far is too far to bike to work?](https://mobilitylab.org/2017/02/27/how-far-bike-work/)
 
 
 ```{r}
@@ -409,7 +404,7 @@ con_ny_trees <- dbConnect(
   bigrquery::bigquery(),
   project = "bigquery-public-data",
   dataset = "new_york_trees",
-  billing = "infra-radius-291118"
+  billing = "workshop-rfun-2021-spring"
 )
 con_ny_trees
 ```
@@ -508,6 +503,7 @@ leaflet() %>%
 ```{r}
 fancy <- leaflet() %>% 
   addTiles() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
   addRectangles(
     sq$lon1, sq$lat1, sq$lon2, sq$lat2,
     fillOpacity = sq$of_max,
@@ -517,6 +513,13 @@ fancy <- leaflet() %>%
   )
 
 fancy
+```
+
+
+```{r}
+library(mapview)
+
+mapshot(fancy, file = "images/tree_cover.png")
 ```
 
 
