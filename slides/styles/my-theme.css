@@ -1,0 +1,27 @@
+.remark-slide-number {
+  font-size: 10pt;
+  margin-bottom: -11.6px;
+  margin-right: 10px;
+  color: #012169; /* white */
+  opacity: 0.5; /* default: 0.5 */
+}
+
+.footercc {
+  /* clear: both; */
+  /* position: relative; */
+  /* height: 200px; */
+  /* margin-top: -200px; */
+  /* font-size: 10pt; */
+  /* margin-bottom: -11.6px; */
+  /* margin-left: 10px; */
+  /* position:absolute; */
+  /* height:60px; */
+  /* color: red;  */
+  /* opacity: 0.7; */
+  /* */
+  position: absolute; 
+  bottom: 11.6px; 
+  left: 10px; 
+  color: #015469;
+  font-size: xx-small;
+}

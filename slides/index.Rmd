@@ -1,11 +1,14 @@
 ---
-title: "Using dplyr to query a relational database"
+title: "Querrying relational databases with dplyr"
+#subtitle: "<i class='fab fa-creative-commons fa-2x'>"
 author: "John Little"
 date: '`r Sys.Date()`'
 output:
   xaringan::moon_reader:
     lib_dir: libs
-    css: xaringan-themer.css
+    css: 
+      - xaringan-themer.css
+      - styles/my-theme.css
     nature:
       highlightStyle: github
       highlightLines: true
@@ -18,24 +21,44 @@ options(htmltools.dir.version = FALSE)
 
 ```{r xaringan-themer, include=FALSE, warning=FALSE}
 library(xaringanthemer)
-style_duo_accent(
-  primary_color = "#1381B0",
-  secondary_color = "#FF961C",
-  inverse_header_color = "#FFFFFF"
-)
+# style_duo_accent(
+#   primary_color = "#1381B0",
+#   secondary_color = "#FF961C",
+#   inverse_header_color = "#FFFFFF"
+# )
 library(tidyverse)
 library(gt)
+# library(xaringanthemer)
+library(xaringanExtra)
+xaringanExtra::use_tachyons()
+library(htmltools)
+tagList(rmarkdown::html_dependency_font_awesome())
+
+style_duo_accent(primary_color = "#012169", secondary_color = "#005587")
 ```
 
+## Duke University: Land Acknowledgement
+
+I would like to take a moment to honor the land in Durham, NC.  Duke University sits on the ancestral lands of the Shakori, Eno and Catawba people. This institution of higher education is built on land stolen from those peoples.  These tribes were here before the colonizers arrived.  Additionally this land has borne witness to over 400 years of the enslavement, torture, and systematic mistreatment of African people and their descendants.  Recognizing this history is an honest attempt to breakout beyond persistent patterns of colonization and to rewrite the erasure of Indigenous and Black peoples.  There is value in acknowledging the history of our occupied spaces and places.  I hope we can glimpse an understanding of these histories by recognizing the origins of collective journeys.
+
+---
+background-image: url("../images/tree_cover.png")
+
+---
 ## Demonstration Goals
 
 - Connect to a remote relational database using R library packages
 - Leverage dplyr verbs to query a relational database
-- Expose some advance query and visualization features
-- Highlight useful documentation / resources 
+- Exposure to query and visualization features
+- Point out useful documentation / resources 
 
 
-This is not an RDBMS class.  The foundations of database administration and database engineering require more time that we have. This is a demonstration on leveraging the Tidyverse.
+.f6.i.moon-gray[This is not an RDBMS class.  The foundations of database administration and database engineering require more time that we have. This is a demonstration on leveraging the Tidyverse.]
+
+<div class="footercc">
+<i class="fab fa-creative-commons"></i>&nbsp; <i class="fab fa-creative-commons-by"></i><i class="fab fa-creative-commons-nc"></i>  <a href = "https://johnlittle.info">https://JohnLittle.info</a>
+</div>
+
 ---
 ##  Flat file
 
@@ -55,7 +78,7 @@ A database with associated entities (tables)
 
 ![](images/database_schema_wikimediacommons.png)
 
-Image Credit:  [SQLPac](https://en.wikipedia.org/wiki/User:SqlPac)
+.f7.i.moon-gray[Image Credit:  [SQLPac](https://en.wikipedia.org/wiki/User:SqlPac)]
 
 ???
 Image Attribution: 
@@ -70,11 +93,13 @@ Flat | Relational
 Best for a single user | Multi-user
 Local disk             | Cloud storage 
 Simple queries         | Advanced queries
-Data is static         | Data is dynamic / changes often
+Data is relatively static | Data is dynamic / changes often
 Small to medium data   | Medium to large dataset 
 Simple format          | Complex structure
 
-
+<div class="footercc">
+<i class="fab fa-creative-commons"></i>&nbsp; <i class="fab fa-creative-commons-by"></i><i class="fab fa-creative-commons-nc"></i>  <a href = "https://johnlittle.info">https://JohnLittle.info</a>
+</div>
 ---
 ## Complexities & Nuances
 
@@ -82,10 +107,13 @@ Simple format          | Complex structure
 - Several good reasons to pursue more complex data structures and deliveries
 - Querying, using, and maintaining databases can be computationally and financially expensive
 
-We're not going to discuss those complexities.  We're going to demonstrate how you can use your RStudio environment to query remote relational databases.
+.f6.i.moon-gray[We will not discuss RDBMS complexities.  The deomonstration focus will be the use of the RStudio environment for querrying remote relational databases.]
 
-
+<div class="footercc">
+<i class="fab fa-creative-commons"></i>&nbsp; <i class="fab fa-creative-commons-by"></i><i class="fab fa-creative-commons-nc"></i>  <a href = "https://johnlittle.info">https://JohnLittle.info</a>
+</div>
 ---
+.pull-left[
 ## SQL
 
 Structured Query Language
@@ -102,30 +130,76 @@ WHERE
   lname = "Little"
 
 ```
+]
 
----
+.pull-right[
 ## dplyr
 
+_and d**b**plyr_
 
 ```r
 employee %>% 
   filter(fname == "John", 
          minit == "R",
          lname == "Little") %>% 
-  select(bdate, address)
+  select(bdate, address) %>%
+  show_query()
 ```
 
 ```r
 left_join()
 ```
+]
 
-_d**b**plyr_
-
+<div class="footercc">
+<i class="fab fa-creative-commons"></i>&nbsp; <i class="fab fa-creative-commons-by"></i><i class="fab fa-creative-commons-nc"></i>  <a href = "https://johnlittle.info">https://JohnLittle.info</a>
+</div>
 ---
 ## Steps
 
 1. [Google BigQuery sandbox](https://cloud.google.com/blog/products/data-analytics/query-without-a-credit-card-introducing-bigquery-sandbox)
 1. `install.packages(c("tidyverse", "DBI", "dbplyr", "bigrquery"))`
 1. [Query BigQuery public datasets](https://cloud.google.com/bigquery/public-data)
+
+
+.bg-washed-blue.b--navy.ba.bw2.br3.shadow-5.ph4.mt5[
+
+#### Get Started 
+
+.blue[See the README document ]  
+.f6[https://github.com/libjohn/casestudy_bigquery_dbplyr#readme]  
+
+.blue[And github code]  
+.f6[https://github.com/libjohn/casestudy_bigquery_dbplyr]
+
+]
+
+
+<div class="footercc">
+<i class="fab fa-creative-commons"></i>&nbsp; <i class="fab fa-creative-commons-by"></i><i class="fab fa-creative-commons-nc"></i>  <a href = "https://johnlittle.info">https://JohnLittle.info</a>
+</div>
+
+---
+class:  middle, center
+
+.bg-washed-blue.b--navy.ba.bw2.br3.shadow-5.ph4.mt5[
+
+## John R Little
+
+.f5.blue[Data Science Librarian  
+Center for Data & Visualization Sciences  
+Duke University Libraries  
+]
+
+.f7[https://johnlittle.info]  
+.f7[https://Rfun.library.duke.edu]  
+.f7[https://library.duke.edu/data]
+]
+
+<i class="fab fa-creative-commons fa-2x"></i> &nbsp; <i class="fab fa-creative-commons-by fa-2x"></i><i class="fab fa-creative-commons-nc fa-2x"></i>  
+.f6.moon-gray[Creative Commons:  Attribution-NonCommercial 4.0]  
+.f7.moon-gray[https://creativecommons.org/licenses/by-nc/4.0]
+
+
 
 
