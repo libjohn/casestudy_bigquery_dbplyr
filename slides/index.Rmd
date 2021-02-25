@@ -72,10 +72,14 @@ background-image: url("../images/tree_cover.png")
 
 A database within in a single table
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 mtcars %>% 
-  slice_head(n = 10) %>% 
-  gt()
+  slice_head(n = 8) %>% 
+  gt() %>% 
+  tab_header(subtitle = md("The `mtcars` dataset in `library(datasets)`"),
+             title = "Motor Trend Car Road Tests"
+             ) %>% 
+  tab_source_note("datasets::mtcars | More information is available at `?mtcars`.")
 ```
 
 
