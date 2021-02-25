@@ -155,6 +155,21 @@ left_join()
 <i class="fab fa-creative-commons"></i>&nbsp; <i class="fab fa-creative-commons-by"></i><i class="fab fa-creative-commons-nc"></i>  <a href = "https://johnlittle.info">https://JohnLittle.info</a>
 </div>
 ---
+## Why do this
+
+
+- **Convenient**: especially if you already know dplyr 
+
+- **Efficient**: Do your data processing and transformations on the RDBMS server 
+
+    - Then visualize locally in R / ggplot2 / dbplot
+
+- **Access** more data
+
+<div class="footercc">
+<i class="fab fa-creative-commons"></i>&nbsp; <i class="fab fa-creative-commons-by"></i><i class="fab fa-creative-commons-nc"></i>  <a href = "https://johnlittle.info">https://JohnLittle.info</a>
+</div>  
+---
 ## Steps
 
 1. [Google BigQuery sandbox](https://cloud.google.com/blog/products/data-analytics/query-without-a-credit-card-introducing-bigquery-sandbox)
