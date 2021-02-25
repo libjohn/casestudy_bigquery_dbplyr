@@ -1,0 +1,130 @@
+---
+title: "Connecting to Google BigQuery with DBplyr"
+author: "John R Little"
+date:  "`r Sys.Date()`"
+output: html_notebook
+---
+
+## Google Cloud Account & Big Query
+
+1) Get a Google Cloud account
+
+    - [BigQuery sandbox](https://cloud.google.com/bigquery/docs/sandbox)
+    - [Google Cloud Free Program](https://cloud.google.com/free/docs/gcp-free-tier)
+    - [BigQuery public datasets](https://cloud.google.com/bigquery/public-data)
+    - [BigQuery](https://cloud.google.com/bigquery)
+    - [GCP-BigQuery Console](https://console.cloud.google.com/bigquery)
+
+No Credit Card?  [Use the BigQuery sandbox](https://cloud.google.com/blog/products/data-analytics/query-without-a-credit-card-introducing-bigquery-sandbox) 
+
+
+
+The first part of this demonstration is inspired by [Kevin Wang's article on BigQuery in R](https://kevinwang09.github.io/post/bigquery-in-r/).  In this example we will query [JHU's Covid19](https://github.com/CSSEGISandData/COVID-19) public dataset. moo
+
+
+## Library packages
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(DBI) 
+library(bigrquery)
+```
+
+
+BigQuery refers to tables in the format `database.dataset.table`. For example, you can run this query in the BigQuery Console
+
+```
+select * from bigquery-public-data.stackoverflow.users limit 10;
+```
+
+## Establish a database connection
+
+First create a new GCP project in the GCP.
+The `dbConnect()` argument, `billing`, should have the value of a GCP **project ID**
+
+GPC > Home > Dashboard
+GPC > BigQuery
+
+```{r}
+# library(DBI)
+
+con <- dbConnect(
+  bigquery(),
+  project = "bigquery-public-data",
+  dataset = "______________",   # Choose a dataset name from your BigQuery Console, within the bigquery-public-data project
+  billing = "______________"    # After setting up your BQ console (or sandbox) provide a project ID.  See the console header.
+)
+con
+```
+
+Now, from **within the R console**, authenticate with GCP
+
+```
+bigrquery::bq_auth()
+```
+## Create a pointer to a Google BQ database table
+
+Our goal is to investigate and search the JHU COVID19 _summary_ **table**.  i.e. bigquery-public-data.covid19_jhu_csse.summary
+
+
+```{r}
+my_db_pointer <- tbl(con, "_______")  # Enter a table name from the dataset you entered above
+```
+
+
+Now I can use [dplyr verbs](https://dplyr.tidyverse.org/) to explore the db table.  
+
+
+```{r}
+# roughly:  SELECT * FROM bigquery-public-data.covid19_jhu_csse.summary limit 10;
+glimpse(my_db_pointer) 
+```
+
+
+```{r}
+# roughly:  SELECT count( * ) FROM summary
+count(my_db_pointer) 
+```
+
+
+
+## dpplyr/dbplyr approach
+
+> `collect()` will run a query that has been assigned to an object. 
+
+`collect()` will activate your SQL query.  Normally, I will try to use use the `collect()` sparingly to economize my connections to the remote database, and limit the data I am requesting from the DB server.  My goal is push my data processing up to the RDBMS server as much as possible.
+
+```
+my_db_pointer %>% 
+  collect()   # this will gather all the data from the summary table
+```
+
+Above will pull the entire data table down into local RAM.  A better approach is to leverage dplyr.  Let dplyr/dbplyr translate queries into SQL and send those to the SQL engine.  This allows use to use the RDMBS for summarizing data while using local RAM and CPU for retrieving only the data you want to manipulate.
+
+
+```{r}
+my_query <- my_db_pointer %>% 
+  filter()  %>% 
+  select() 
+
+my_query 
+```
+
+### show_query()
+
+If you want to see the SQL
+
+```{r}
+my_query %>% 
+  show_query()
+```
+
+
+
+## Resources
+
+- [Databases using R](https://db.rstudio.com/)
+- [library(DBI)](https://dbi.r-dbi.org/reference/)
+- [library(bigrquery)](https://bigrquery.r-dbi.org/)
+- [library(dbplyr)](https://dbplyr.tidyverse.org/)
+- [RStudio Conf 2019, 15 min. Recording](https://rstudio.com/resources/rstudioconf-2019/databases-using-r-the-latest/)
