@@ -1,4 +1,5 @@
 ---
+always_allow_html: true
 output: github_document
 ---
 
@@ -52,3 +53,13 @@ Get a Google Cloud account
 
 
 ![](images/tree_cover.png)
+
+## License
+John Little  
+https://JohnLittle.info  
+https://Rfun.library.duke.edu  
+https://library.duke.edu/data  
+
+CC BY-NC  
+Creative Commons Attribution-NonCommercial  
+https://creativecommons.org/licenses/by-nc/4.0  

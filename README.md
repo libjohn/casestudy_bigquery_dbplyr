@@ -53,3 +53,14 @@ Get a Google Cloud account
     **Console**](https://console.cloud.google.com/bigquery)
 
 ![](images/tree_cover.png)
+
+## License
+
+John Little  
+<https://JohnLittle.info>  
+<https://Rfun.library.duke.edu>  
+<https://library.duke.edu/data>
+
+CC BY-NC  
+Creative Commons Attribution-NonCommercial  
+<https://creativecommons.org/licenses/by-nc/4.0>
