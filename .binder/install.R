@@ -1,0 +1,18 @@
+install.packages(c(
+  "tidyverse",
+  "remotes",
+  "bigrquery",
+  "DBI",
+  "dbplot",
+  "glue",
+  "gt",
+  "htmltools",
+  "knitr",
+  "leaflet",
+  "mapview",
+  "rmarkdown",
+  "tidyverse",
+  "xaringan",
+  "xaringanthemer"
+))
+remotes::install_github("gadenbuie/xaringanExtra")

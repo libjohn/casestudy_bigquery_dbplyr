@@ -1,0 +1,33 @@
+Type: Compendium
+Package: R workshop for using making ODBC connections to databases such as Google's BigQuery
+Title: R case study: public datasets in Google BigQuery using DBplyr
+Version: 1.1.0
+Authors@R: 
+    person(given = "John",
+           family = "Little",
+           role = c("aut", "cre"),
+           email = "John.Little@Duke.edu",
+           comment = c(ORCID = "0000-0002-3600-0972"))
+Description: Case study demonstrating ODVC connectivity via the DBI package.  Practical focus using Google BigQuery and the bigrquery library
+License: CC BY-NC
+URL: https://github.com/libjohn/casestudy_bigquery_dbplyr
+Depends: 
+    bigrquery,
+    DBI,
+    dbplot,
+    glue,
+    gt,
+    htmltools,
+    knitr,
+    leaflet,
+    mapview,
+    remotes,
+    rmarkdown,
+    tidyverse,
+    xaringan,
+    xaringanExtra,
+    xaringanthemer
+Remotes: 
+    gadenbuie/xaringanExtra
+Encoding: UTF-8
+LazyData: true
