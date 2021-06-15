@@ -7,8 +7,10 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4908847.svg)](https://doi.org/10.5281/zenodo.4908847)
 
+[![ORCID](https://img.shields.io/badge/ORCID-0000--0002--3600--0972-A6CE39?logo=ORCID&logoColor=A6CE39)](https://orcid.org/0000-0002-3600-0972)
+
 [![Creative Commons CC
-BY-NC](https://img.shields.io/badge/Creative%20Commons-BY--NC-lightgrey?logo=creative%20commons&logoColor=yellow)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+BY-NC](https://img.shields.io/badge/Creative%20Commons-BY--NC-EF9421?logo=creative%20commons&logoColor=EF9421)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 
 [![Lifecycle
 Badge](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://www.tidyverse.org/lifecycle/#stable)
