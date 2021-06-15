@@ -7,6 +7,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4908847.svg)](https://doi.org/10.5281/zenodo.4908847)
 
+[![Creative Commons CC
+BY-NC](https://img.shields.io/badge/Creative%20Commons-BY--NC-lightgrey?logo=creative%20commons&logoColor=yellow)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+
 [![Lifecycle
 Badge](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://www.tidyverse.org/lifecycle/#stable)
 
