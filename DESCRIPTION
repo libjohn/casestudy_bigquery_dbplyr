@@ -1,7 +1,7 @@
 Type: Compendium
 Package: R workshop for using making ODBC connections to databases such as Google's BigQuery
 Title: R case study: public datasets in Google BigQuery using DBplyr
-Version: 1.1.0
+Version: 1.1.1
 Authors@R: 
     person(given = "John",
            family = "Little",

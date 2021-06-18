@@ -4,8 +4,9 @@
 # README
 
 <!-- badges: start -->
+<!-- DOI: All versions.  10.5281/zenodo.4908846 -->
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4908847.svg "DOI")](https://doi.org/10.5281/zenodo.4908847)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.4908846%20(Latest%20Version%20Release)-blue "DOI")](https://doi.org/10.5281/zenodo.4908846)
 
 [![ORCID](https://img.shields.io/badge/ORCID-0000--0002--3600--0972-A6CE39?logo=ORCID&logoColor=A6CE39 "ORCID")](https://orcid.org/0000-0002-3600-0972)
 
